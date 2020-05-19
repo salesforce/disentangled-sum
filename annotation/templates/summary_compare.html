@@ -1,0 +1,347 @@
+<!-- Copyright (c) 2018, salesforce.com, inc. -->
+<!-- * All rights reserved. -->
+<!-- * SPDX-License-Identifier: BSD-3-Clause -->
+<!-- * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause -->
+<!-- META TAGS -->
+<meta content="width=device-width,initial-scale=1" name="viewport" />
+
+<!-- CSS FRAMEWORK -->
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+
+<!-- ICON PACK -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.0/css/all.css"
+    integrity="sha384-Mmxa0mLqhmOeaE8vgOSbKacftZcsNYDjQzuCOm6D02luYSzBG8vpaOykv9lFQ51Y" crossorigin="anonymous">
+
+<!-- jquery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<!-- mathjax -->
+<!-- TODO: Ajax  reprocessing when content is replaced (button is pressed.) -->
+<script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML">
+    </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+
+<!-- TASK VIEW -->
+<div class="container centered">
+    <div class="columns">
+        <div class="column col-10 col-mx-auto">
+
+            <a class="float-right question" href="#instructions">
+                <i class="far fa-question-circle"></i>
+            </a>
+            <!-- TASK -->
+            <div class="modal-title h5" id="exid">Summary {{ exid }} / {{ max_count }}</div>
+
+            <table class="table table-striped" id="summary_table">
+            <thead>
+                <tr>
+                <th>Model</th>
+                <th>Contribution</th>
+                <th>Background</th>
+                </tr>
+            </thead>
+            <tbody class="summary_tbody">
+                {{ summary|safe }}
+            </tbody>
+            </table>
+
+            <div style="text-align: center">
+                <div style="display: inline-block; text-align: left">
+                    <div class='modal-title h5'>Disentanglement</div>
+                    1. Please pick the <b style="color: #11aa11">most</b> disentangled summary pairs.
+                    <div class="form-group">
+                        <b>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="most_dis" value="A"><i class="form-icon"></i> A
+                        </label>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="most_dis" value="B"><i class="form-icon"></i> B
+                        </label>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="most_dis" value="C"><i class="form-icon"></i> C
+                        </label>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="most_dis" value="D"><i class="form-icon"></i> D
+                        </label>
+                        </b>
+                        <input type="hidden" value="{{ exid }}" name="example_id">
+                    </div>
+                    2. Please pick the <b style="color: #aa1111">least</b> disentangled summary pairs.
+                    <div class="form-group">
+                        <b>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="least_dis" value="A"><i class="form-icon"></i> A
+                        </label>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="least_dis" value="B"><i class="form-icon"></i> B
+                        </label>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="least_dis" value="C"><i class="form-icon"></i> C
+                        </label>
+                        <label class="form-radio form-inline">
+                            <input type="radio" name="least_dis" value="D"><i class="form-icon"></i> D
+                        </label>
+                        </b>
+                        <input type="hidden" value="{{ exid }}" name="example_id">
+                    </div>
+
+                    {% if not hide_button %}
+                        <input type="submit" id="submitButton" class="btn btn-primary" value="Submit">
+                    {% endif %}
+                </div>
+            </div><!-- /form-group -->
+        </div><!-- /column -->
+    </div><!-- / columns -->
+</div><!-- /container -->
+
+<!-- INSTRUCTIONS MODAL -->
+<div class="modal" id="instructions"><a class="modal-overlay" href="" aria-label="Close"></a>
+    <div class="modal-container" role="document">
+        <div class="modal-header"><a class="btn btn-clear float-right" href="" aria-label="Close"></a>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+                <div class="modal-title h4">Instruction</div>
+                <p class="text-justify">
+                In this task, you will read 4 pairs of text generation results describing contribution and background information for the same paper, where each <b>row</b> corresponds to a pair of contribution and background summaries generated by one model. The task is to find the best and the worst models given a criterion.</p>
+                <p class="text-justify">
+                    <label class="form-label h5">Criterion: Disentanglement between Contribution and Background summaries.</label>
+                    <hr />
+                    <ul>
+                        <li>As the name suggests, the more different content discussed within the same model, the better it is in terms of disentanglement.</li>
+                        <li>Please do NOT consider the faithfulness of summaries to the target mode (i.e., contribution / background).</li>
+                        <li>Instead, only measure the goodness of content separation between the two summaries for each model.</li>
+                    </ul>
+                </p>
+            </div><!-- content -->
+        </div><!-- body -->
+    </div><!-- container -->
+</div><!-- modal -->
+
+<!-- ERROR MODAL -->
+<div class="modal" id="error"><a class="modal-overlay" href="" aria-label="Close"></a>
+    <div class="modal-container" role="document">
+        <div class="modal-header"><a class="btn btn-clear float-right" href="" aria-label="Close"></a>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+                <div class="modal-title h5">Oops! The following error(s) occurred:</div>
+                <ul class="error-list">
+
+                </ul>
+            </div><!-- content -->
+        </div><!-- body -->
+    </div><!-- container -->
+</div><!-- modal -->
+
+<!-- COMPLETE MODAL -->
+<div class="modal" id="complete" onclick="return false;"><a class="modal-overlay" href=""></a>
+    <div class="modal-container" role="document">
+        <div class="modal-body">
+            <div class="content">
+                <div class="modal-title h5">You are done! Please close the window/tab and complete the task. Thank you!</div>
+            </div><!-- content -->
+        </div><!-- body -->
+    </div><!-- container -->
+</div><!-- modal -->
+
+
+<!-- JAVASCRIPT -->
+<script>
+
+    function getRadioVal(element) {
+        var val;
+        
+        for (var i=0, len=element.length; i<len; i++) {
+            if ( element[i].checked ) {
+                val = element[i].value;
+                break; 
+            }
+        }
+        return val;
+    }
+    function emptyRadioVal(element) {
+        for (var i=0, len=element.length; i<len; i++) {
+            element[i].checked = "";
+        }
+    }
+
+    function validateRadioVal(element){
+        var is_checked = False;
+        for (var i=0, len=element.length; i<len; i++) {
+            if ( element[i].checked ) {
+                is_checked = True;
+                break; 
+            }
+        }
+        return is_checked;
+    }
+
+    // show instructions for first time visitor
+    function getCookie(visited) {
+        const match = document.cookie.match(new RegExp('(^| )' + "visited" + '=([^;]+)'));
+        if (!match) {
+            // open instruction
+            window.location.href = window.location.href + "#instructions";
+
+            // set cookie with 1hr expire
+            let now = new Date();
+            now.setTime(now.getTime() + 1 * 600 * 1000);
+            document.cookie = "visited=yes; expires=" + now.toUTCString() + "; path=/";
+        }
+        if (match) {
+            return true;
+        }
+    }
+    getCookie();
+
+    // form validation event
+    window.onload = function () {
+        document.getElementById("submitButton").setAttribute("onclick", "return validateForm()");
+        document.getElementById("submitButtonStop").setAttribute("onclick", "return forceShut()");
+    }
+
+
+    // form validates form and shows error modal
+    function validateForm() {
+        var most_dis_el = document.getElementsByName("most_dis");
+        var least_dis_el = document.getElementsByName("least_dis");
+
+        // disentanglement
+        const most_dis = getRadioVal(most_dis_el);
+        const least_dis = getRadioVal(least_dis_el);
+
+        $.ajax({
+            type: 'POST',
+            url: "{{ url_for( 'render_example' ) }}",
+            data: JSON.stringify({most_dis: most_dis, least_dis: least_dis}),
+            contentType: "application/json",
+            success: function (response) {
+                response = JSON.parse(response);
+                if (response['is_done']) {
+                    window.location.href = window.location.href + "#complete";
+                    return true
+                }
+                else {
+                    $(".summary_tbody").empty().append($.parseHTML(response['new_text']));
+                    $("#exid").empty().append($.parseHTML("<b>Summary: " + response['new_exid'] + "/" + response['max_count'] + "</b>"));
+                    $("input[name='example_id']").val(response['new_exid']);
+                    emptyRadioVal(most_dis_el);
+                    emptyRadioVal(least_dis_el);
+                }
+            }
+        })
+
+        // everything is ok
+        return true;
+    }
+
+    function forceShut() {
+        window.location.href = window.location.href + "#complete";
+        return true
+    }
+
+</script>
+
+<!-- STYLESHEETS -->
+<style>
+
+    .form-radio {
+        margin-right: 20px
+    }
+
+    .centered {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+
+    .modal.active .modal-overlay,
+    .modal:target .modal-overlay {
+        background: #fff;
+    }
+
+    .modal-container {
+        background: #f1f5f8;
+        padding: 1rem;
+        max-height: 100vh;
+        max-width: 960;
+    }
+
+    .modal-container .modal-body {
+        padding: 0rem .8rem .8rem .8rem;
+    }
+
+    .modal-container .modal-header {
+        padding: .8rem .8rem .0rem .8rem;
+    }
+
+    .modal-title {
+        padding-bottom: .8rem;
+    }
+
+    .form-group {
+        margin-bottom: 0rem;
+    }
+
+    .table {
+        margin: 0 0 1.2rem
+    }
+
+    textarea.form-input,
+    textarea.form-input.input-lg,
+    textarea.form-input.input-sm {
+        border-radius: 1px;
+        margin-bottom: 0.1rem;
+    }
+
+    textarea.form-input:last-of-type,
+    textarea.form-input.input-lg:last-of-type,
+    textarea.form-input.input-sm:last-of-type {
+        border-radius: 1px;
+        margin-bottom: 1.2rem;
+    }
+
+    .question {
+        font-size: 1rem;
+    }
+
+    .btn.btn-confirm:focus,
+    .btn.btn-confirm:hover {
+        border-color: transparent;
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .2);
+        transition: background-color .2s ease-in-out;
+    }
+
+    .btn.btn-confirm {
+        background: #A0ECB2;
+        border-color: transparent;
+        color: #3b4351;
+        font-weight: 500;
+        border-radius: 18px;
+        padding: 0px 18px 0px 18px;
+        margin-right: 4px;
+    }
+
+    .mark {
+        background: #ffe9b3;
+        border-bottom: .05rem solid #ffd367;
+        border-radius: .1rem;
+        color: #3b4351;
+        padding: .05rem .1rem 0;
+    }
+
+
+    .text-justify {
+        text-align: justify;
+        text-justify: inter-word;
+    }
+</style>
