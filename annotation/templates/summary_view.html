@@ -1,0 +1,337 @@
+<!-- Copyright (c) 2018, salesforce.com, inc. -->
+<!-- * All rights reserved. -->
+<!-- * SPDX-License-Identifier: BSD-3-Clause -->
+<!-- * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause -->
+<!-- META TAGS -->
+<meta content="width=device-width,initial-scale=1" name="viewport" />
+
+<!-- CSS FRAMEWORK -->
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-exp.min.css">
+<link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre-icons.min.css">
+
+<!-- ICON PACK -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.0/css/all.css"
+    integrity="sha384-Mmxa0mLqhmOeaE8vgOSbKacftZcsNYDjQzuCOm6D02luYSzBG8vpaOykv9lFQ51Y" crossorigin="anonymous">
+
+<!-- jquery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<!-- mathjax -->
+<!-- TODO: Ajax  reprocessing when content is replaced (button is pressed.) -->
+<script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML">
+    </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+  </script>
+<!-- TASK VIEW -->
+<div class="container centered">
+    <div class="columns">
+        <div class="column col-10 col-mx-auto">
+
+            <a class="float-right question" href="#instructions">
+                <i class="far fa-question-circle"></i>
+            </a>
+            <!-- TASK -->
+            <div class="modal-title h5">Select sentences that describes the contribution.</div>
+
+            <label class="form-label" id="exid"><b>Summary: {{ exid }}</b></label>
+            <p class="article">{{ summary|safe }}</p>
+            <div class="form-group">
+                <input type="hidden" class="form-input" id="highlights" type="text" name="highlights">
+                <input type="hidden" value="{{ exid }}" name="example_id">
+                {% if not hide_button %}
+                    <p><input type="submit" id="submitButton" class="btn btn-primary" value="Submit"></p>
+                    <p><input type="submit" id="submitButtonStop" class="btn btn-primary" value="Stop here"></p>
+                {% endif %}
+            </div><!-- /form-group -->
+        </div><!-- /column -->
+    </div><!-- / columns -->
+</div><!-- /container -->
+
+<!-- INSTRUCTIONS MODAL -->
+<div class="modal" id="instructions"><a class="modal-overlay" href="" aria-label="Close"></a>
+    <div class="modal-container" role="document">
+        <div class="modal-header"><a class="btn btn-clear float-right" href="" aria-label="Close"></a>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+                <div class="modal-title h4">Instruction</div>
+                <p class="text-justify">
+                    In this task, you will read a scientific paper abstracts select sentences that describes the
+                    contributions of the papers.</p>
+                <p class="text-justify">
+                    <label class="form-label h5">Criterion</label>
+                    <hr />
+                    <ul>
+                        <li>A contribution is defined as a new element a paper provides.</li>
+                        <li>Contributions can be proofs, methods, analyses, reviews.</li>
+                        <li>Contributions are <b>NOT</b> problem statements.</li>
+                        <li>Contributions are <b>NOT</b> implications (beliefs, hypotheses).</li>
+                    </ul>
+                    <label class="form-label h5">Example</label>
+                    <hr />
+
+                    <label class="form-label"><b>Example article with GOOD sentence selection:</b></label>
+                    <blockquote class="text-justify">
+                        <p>It is well known that the standard likelihood training and approximate decoding objectives in
+                            neural text generation models lead to less human-like responses for open-ended tasks such as
+                            language modeling and story generation.
+                            <mark>In this paper we have analyzed limitations of these models for abstractive document
+                                summarization and found that these models are highly prone to hallucinate content that
+                                is unfaithful to the input document.
+                                We conducted a large scale human evaluation of several neural abstractive summarization
+                                systems to better understand the types of hallucinations they produce.
+                                Our human annotators found substantial amounts of hallucinated content in all model
+                                generated summaries.
+                                However, our analysis does show that pretrained models are better summarizers not only
+                                in terms of raw metrics, i.e., ROUGE, but also in generating faithful and factual
+                                summaries as evaluated by humans. Furthermore, we show that textual entailment measures
+                                better correlate with faithfulness than standard metrics, potentially leading the way to
+                                automatic evaluation metrics as well as training and decoding criteria.</mark>
+                        </p>
+                    </blockquote>
+                    <p class="text-justify">Explanation: We don't select the first sentence, as it's about background
+                        problem statement. The rest of the abstract are all talking about what they provide in this
+                        paper, so we mark all of them.</p>
+
+                    <label class="form-label"><b>Example article with BAD sentence selection:</b></label>
+                    <blockquote class="text-justify">
+                        <p><mark>We investigate the problem of readeraware multi-document summarization
+                                (RA-MDS) and introduce a new dataset
+                                for this problem. To tackle RA-MDS,
+                                we extend a variational auto-encodes
+                                (VAEs) based MDS framework by jointly
+                                considering news documents and reader
+                                comments. Experimental results show
+                                that reader comments can improve the
+                                summarization performance, which also
+                                demonstrates the usefulness of the proposed dataset.</mark>
+                            The annotated dataset for RA-MDS is available online.</p>
+                    </blockquote>
+                    <p class="text-justify">Explanation: Wrong marking of the first sentence, which describes the
+                        problem tackled by the authors. The last sentence is more like a meta-comment to the readers,
+                        which is also already covered by the first sentence: "new dataset", so we skip it.</p>
+
+            </div><!-- content -->
+        </div><!-- body -->
+    </div><!-- container -->
+</div><!-- modal -->
+
+<!-- ERROR MODAL -->
+<div class="modal" id="error"><a class="modal-overlay" href="" aria-label="Close"></a>
+    <div class="modal-container" role="document">
+        <div class="modal-header"><a class="btn btn-clear float-right" href="" aria-label="Close"></a>
+        </div>
+        <div class="modal-body">
+            <div class="content">
+                <div class="modal-title h5">Oops! The following error(s) occurred:</div>
+                <ul class="error-list">
+
+                </ul>
+            </div><!-- content -->
+        </div><!-- body -->
+    </div><!-- container -->
+</div><!-- modal -->
+
+<!-- COMPLETE MODAL -->
+<div class="modal" id="complete"><a class="modal-overlay" href=""></a>
+    <div class="modal-container" role="document">
+        <div class="modal-body">
+            <div class="content">
+                <div class="modal-title h5">You are done!</div>
+            </div><!-- content -->
+        </div><!-- body -->
+    </div><!-- container -->
+</div><!-- modal -->
+
+
+<!-- JAVASCRIPT -->
+<script>
+    // show instructions for first time visitor
+    function getCookie(visited) {
+        const match = document.cookie.match(new RegExp('(^| )' + "visited" + '=([^;]+)'));
+        if (!match) {
+            // open instruction
+            window.location.href = window.location.href + "#instructions";
+
+            // set cookie with 1hr expire
+            let now = new Date();
+            now.setTime(now.getTime() + 1 * 600 * 1000);
+            document.cookie = "visited=yes; expires=" + now.toUTCString() + "; path=/";
+        }
+        if (match) {
+            return true;
+        }
+    }
+    getCookie();
+
+    // form validation event
+    window.onload = function () {
+        document.getElementById("submitButton").setAttribute("onclick", "return validateForm()");
+        document.getElementById("submitButtonStop").setAttribute("onclick", "return forceShut()");
+    }
+
+
+    // form validates form and shows error modal
+    function validateForm() {
+        const article = document.querySelector(".article").innerHTML;
+        const articleSplit = article.split("</span>").filter(function (el) {return el.length != 0});
+        const highlights = document.querySelector("[name=highlights]").value;
+        const example_id = document.querySelector("[name=example_id]").value;
+        const highlightsSplit = highlights.split(",").filter(function (el) {return el.length != 0});
+
+        $.ajax({
+            type: 'POST',
+            url: "{{ url_for( 'render_example' ) }}",
+            data: JSON.stringify({value: highlights, exid: example_id}),
+            contentType: "application/json",
+            success: function (response) {
+                response = JSON.parse(response);
+                if (response['is_done']) {
+                    window.location.href = window.location.href + "#complete";
+                    return true
+                }
+                else {
+                    $(".article").empty().append($.parseHTML(response['new_text']));
+                    $("#exid").empty().append($.parseHTML("<b>Summary: " + response['new_exid'] + "</b>"));
+                    $("input[name='example_id']").val(response['new_exid']);
+                    processSelection();
+                }
+            }
+        })
+
+        // everything is ok
+        return true;
+    }
+
+    function forceShut() {
+        window.location.href = window.location.href + "#complete";
+        return true
+    }
+
+    // process selections
+    function processSelection() {
+        const article = document.querySelectorAll("span");
+        article.forEach((sentence) => {
+            sentence.addEventListener('click', () => {
+
+                // toggle sentence highlight
+                sentence.classList.toggle("mark");
+
+                /* insert highlight into hidden input */
+                // setup variables
+                const input = document.querySelector("[name=highlights]");
+                const marked = document.querySelectorAll(".mark");
+                const markedArr = [];
+
+                // find all mark classes
+                for (i = 0; i < marked.length; i++) {
+                    markedArr.push(marked[i].id);
+                }
+
+                // insert into form
+                function processMarkedId() {
+                    input.value = markedArr;
+                }
+
+                processMarkedId();
+            });
+        });
+    }
+    processSelection()
+</script>
+
+<!-- STYLESHEETS -->
+<style>
+    .centered {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+
+    .modal.active .modal-overlay,
+    .modal:target .modal-overlay {
+        background: #fff;
+    }
+
+    .modal-container {
+        background: #f1f5f8;
+        padding: 1rem;
+        max-height: 100vh;
+        max-width: 960;
+    }
+
+    .modal-container .modal-body {
+        padding: 0rem .8rem .8rem .8rem;
+    }
+
+    .modal-container .modal-header {
+        padding: .8rem .8rem .0rem .8rem;
+    }
+
+    .modal-title {
+        padding-bottom: .8rem;
+    }
+
+    .form-group {
+        margin-bottom: 0rem;
+    }
+
+    .table {
+        margin: 0 0 1.2rem
+    }
+
+    textarea.form-input,
+    textarea.form-input.input-lg,
+    textarea.form-input.input-sm {
+        border-radius: 1px;
+        margin-bottom: 0.1rem;
+    }
+
+    textarea.form-input:last-of-type,
+    textarea.form-input.input-lg:last-of-type,
+    textarea.form-input.input-sm:last-of-type {
+        border-radius: 1px;
+        margin-bottom: 1.2rem;
+    }
+
+    .question {
+        font-size: 1rem;
+    }
+
+    .btn.btn-confirm:focus,
+    .btn.btn-confirm:hover {
+        border-color: transparent;
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, .2);
+        transition: background-color .2s ease-in-out;
+    }
+
+    .btn.btn-confirm {
+        background: #A0ECB2;
+        border-color: transparent;
+        color: #3b4351;
+        font-weight: 500;
+        border-radius: 18px;
+        padding: 0px 18px 0px 18px;
+        margin-right: 4px;
+    }
+
+    .mark {
+        background: #ffe9b3;
+        border-bottom: .05rem solid #ffd367;
+        border-radius: .1rem;
+        color: #3b4351;
+        padding: .05rem .1rem 0;
+    }
+
+
+    .text-justify {
+        text-align: justify;
+        text-justify: inter-word;
+    }
+</style>
