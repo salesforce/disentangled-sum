@@ -1,7 +1,7 @@
 # What's new? Summarizing Contributions in Scientific Literature
 Authors: [Hiroaki Hayashi](hiroakih.me), [Wojciech Kryściński](https://twitter.com/iam_wkr), [Bryan McCann](https://bmccann.github.io/), [Nazneen Rajani](http://www.nazneenrajani.com/), [Caiming Xiong](http://cmxiong.com/)
 
-Paper link: TODO.
+[Paper](https://arxiv.org/abs/2011.03161)
 
 ## Introduction
 
@@ -28,7 +28,7 @@ Through a human study involving expert annotators, we show that in 79%, of cases
 
 ## Updates
 
-10/X/20: Initial code release.
+11/9/20: Initial code release.
 
 ## Usage
 
@@ -104,10 +104,10 @@ See the file for the argument details.
 
 ## Citation
 ```
-@article{hayashi2020,
+@article{hayashi2020whats,
   author    = {Hiroaki Hayashi and Wojciech Kry{\'s}ci{\'n}ski and Bryan McCann and Nazneen Rajani and Caiming Xiong},
   title     = {What's new? Summarizing Contributions in Scientific Literature},
-  journal   = {arXiv preprint arXiv:TODO},
+  journal   = {arXiv preprint arXiv:2011.03161},
   year      = {2020},
 }
 ```
