@@ -378,7 +378,7 @@ class Filter(flutes.PoolState):
         Used by filtering/filter_ids.py.
         """
         # ignore irrelevant entry (cf. filter_ids.py)
-        file_, _ = file_
+        file_, *_ = file_
 
         with gzip.open(str(file_), "r") as f:
             # metadata_ID.jsonl.gz
