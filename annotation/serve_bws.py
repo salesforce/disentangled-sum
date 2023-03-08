@@ -33,8 +33,8 @@ args = parser.parse_args()
 
 app = Flask(__name__)
 app.debug = True
-# app.config["FLASK_HTPASSWD_PATH"] = "/export/home/.htpasswd"
-# app.config["FLASK_SECRET"] = "6@#6S8adMI"
+# app.config["FLASK_HTPASSWD_PATH"] = ""
+# app.config["FLASK_SECRET"] = ""
 # app.config["FLASK_AUTH_ALL"] = True
 
 # htpasswd = HtPasswdAuth(app)
